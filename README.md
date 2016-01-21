@@ -1,4 +1,5 @@
-= Example
+Example
+=======
 ```
 secretKey = '[Secret Key]'
 publicKey = '[Public Key]'
