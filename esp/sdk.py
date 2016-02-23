@@ -3,9 +3,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import logging
 
-import requests
-
 from .auth import ESPAuth
+from .packages import requests
 from .settings import settings
 
 logger = logging.getLogger(__name__)

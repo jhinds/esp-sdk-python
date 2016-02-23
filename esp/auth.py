@@ -5,7 +5,7 @@ import hmac
 from time import mktime
 from urllib.parse import urlparse
 from wsgiref.handlers import format_date_time
-from requests.auth import AuthBase
+from .packages.requests.auth import AuthBase
 
 CONTENT_TYPE = 'application/vnd.api+json'
 
