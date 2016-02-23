@@ -2,7 +2,9 @@
 from setuptools import setup
 
 packages = [
-    'esp'
+    'esp',
+    'esp.packages',
+    'esp.packages.requests'
 ]
 
 #with open('README.rst', 'r', 'utf-8') as f:
