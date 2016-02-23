@@ -20,21 +20,6 @@ class ESPAuth(AuthBase):
     the `auth` parameter.
     """
 
-    def __call__(self, r):
-        """
-        :param r: requests Request object instance
-        :type r: requests.Request
-        """
-        now = datetime.now()
-        tt = mktime(now.timetuple())
-        self.date = format_date_time(tt)
-        r.headers['Authorization'] = self.sign_request(r)
-        r.headers['Content-MD5'] = self.body_md5(r.body)
-        r.headers['Content-Type'] = CONTENT_TYPE
-        r.headers['Accept'] = CONTENT_TYPE
-        r.headers['Date'] = self.date
-        return r
-
     def __init__(self, access_key_id, secret_access_key):
         """
         :param access_key_id: public access key from ESP
@@ -45,6 +30,24 @@ class ESPAuth(AuthBase):
         self.access_key_id = access_key_id
         self.secret_access_key = secret_access_key
         self.date = None # set at the time of __call__ in case of reuse
+
+    def __call__(self, r):
+        """
+        :param r: requests Request object instance
+        :type r: requests.Request
+        """
+        self.date = self._request_date()
+        r.headers['Authorization'] = self.sign_request(r)
+        r.headers['Content-MD5'] = self.body_md5(r.body)
+        r.headers['Content-Type'] = CONTENT_TYPE
+        r.headers['Accept'] = CONTENT_TYPE
+        r.headers['Date'] = self.date
+        return r
+
+    def _request_date(self):
+        now = datetime.now()
+        tt = mktime(now.timetuple())
+        return format_date_time(tt)
 
     def body_md5(self, body=None):
         """
