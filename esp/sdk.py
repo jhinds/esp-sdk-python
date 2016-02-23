@@ -6,24 +6,23 @@ import logging
 import requests
 
 from .auth import ESPAuth
-from .settings import (access_key_id, secret_access_key, user_agent, host,
-                       api_prefix)
+from .settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 def make_endpoint(uri):
-    url = '{}/{}/{}'.format(host, api_prefix, uri)
+    url = '{}{}/{}'.format(settings.host, settings.api_prefix, uri)
     return url
 
 
 def requester(url, request_type, headers={}, data=None):
     logging.debug('Making request to {}'.format(url))
-    headers['User-Agent'] = user_agent
+    headers['User-Agent'] = settings.user_agent
     method = getattr(requests, request_type)
     response = method(url, data=data, headers=headers, auth=ESPAuth(
-        access_key_id=access_key_id,
-        secret_access_key=secret_access_key
+        access_key_id=settings.access_key_id,
+        secret_access_key=settings.secret_access_key
     ))
     return response.json()
 

@@ -9,15 +9,15 @@ class ESPResource(object):
     def __init__(self, data):
         if data['type'] != self.plural_name:
             raise ObjectMismatchError('{} cannot store data for {}'.format(
-                name, data['type']))
+                self.plural_name, data['type']))
         self.id = data['id']
 
-        for k, v in data['attributes']:
+        for k, v in data['attributes'].items():
             setattr(self, k, v)
 
         # relationships are methods and so we store the link to those resources
         # in a property prefixed with an underscore.
-        for k, v in data['relationships']:
+        for k, v in data['relationships'].items():
             setattr(self, '_{}'.format(k), v)
 
     @property
@@ -36,6 +36,8 @@ class ESPResource(object):
 
     @classmethod
     def all(cls):
-        endpoint = make_endpoint(cls.plural_name)
+        name = cls.__name__.lower() + 's'
+        endpoint = make_endpoint(name)
         data = requester(endpoint, 'get')
-
+        for record in data['data']:
+            yield cls(record)
