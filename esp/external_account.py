@@ -1,4 +1,4 @@
-from esp.resource import ESPResource
+from .resource import ESPResource
 
 
 class ExternalAccount(ESPResource):

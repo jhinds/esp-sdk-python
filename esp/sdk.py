@@ -23,7 +23,7 @@ def requester(url, request_type, headers={}, data=None):
         access_key_id=settings.access_key_id,
         secret_access_key=settings.secret_access_key
     ))
-    return response.json()
+    return response
 
 
 #class ESP(object):
