@@ -22,23 +22,37 @@ class RelationshipDoesNotExist(Exception):
 
 
 class PaginatedCollection(object):
-    pass
+
+    def __init__(self, data):
+        self.data = data
 
 
-def find_class(name):
+def find_class_for_resource(name):
+    """
+    Takes a singular resource name and returns the class object for it
+
+    :param name: name of the resource in singular form (e.g report, alert)
+    :type name: string
+    """
     package = '.'.join(__name__.split('.')[:-1])
     module = importlib.import_module('.{}'.format(name), package=package)
     return getattr(module, underscore_to_titlecase(name))
 
 
 class CachedRelationship(object):
+    """
+    Used to store the results of an API call for relationship data
+    """
 
     def __init__(self, name, rel):
-        self.name = name
+        self.class_object = find_class_for_resource(name)
         self.endpoint = rel['links']['related']
         self._cached_collection = None
 
     def fetch(self):
+        """
+        Memoized function that stored raw results in self._cached_collection
+        """
         if not self._cached_collection:
             response = requester(self.endpoint, GET_REQUEST)
             if response.status_code != 200:
@@ -46,8 +60,8 @@ class CachedRelationship(object):
             data = response.json()['data']
             # TODO(kt) detect pagination responses and create a paginated
             # collection
-            cls = find_class(self.name)
-            self._cached_collection = [cls(resource) for resource in data]
+            self._cached_collection = PaginatedCollection(
+                self.class_object, data)
         return self._cached_collection
 
     def reload(self):
