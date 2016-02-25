@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import logging
 
-from .auth import ESPAuth
+from .auth import ESPAuth, UnauthorizedError
 from .packages import requests
 from .settings import settings
 
@@ -23,6 +23,8 @@ def requester(url, request_type, headers={}, data=None):
         access_key_id=settings.access_key_id,
         secret_access_key=settings.secret_access_key
     ))
+    if response.status_code == 401:
+        raise UnauthorizedError
     return response
 
 

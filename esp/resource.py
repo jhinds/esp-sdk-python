@@ -1,6 +1,8 @@
 from .sdk import requester, make_endpoint
-from .utilities import pluralize
 from .packages import six
+from .utilities import (pluralize,
+                        titlecase_to_underscore,
+                        underscore_to_titlecase)
 
 GET_REQUEST = 'get'
 POST_REQUEST = 'post'
@@ -16,19 +18,55 @@ class RelationshipDoesNotExist(Exception):
     pass
 
 
+class PaginatedCollection(object):
+    pass
+
+
+def find_class(name):
+    import ipdb; ipdb.set_trace()
+    module = __import__('.{}'.format(name))
+    pass
+
+
+class CachedRelationship(object):
+
+    def __init__(self, name, rel):
+        self.name = name
+        self.endpoint = rel['links']['related']
+        self._cached_collection = None
+
+    def fetch(self):
+        if not self._cached_collection:
+            # detect class type
+            # call endpoint
+            # iterate over results
+            response = requester(self.endpoint, GET_REQUEST)
+            if response.status_code != 200:
+                response.raise_for_status()
+            data = response.json()['data']
+            # TODO(kt) detect pagination responses and create a paginated
+            # collection
+            for resource in data:
+                pass
+        return self._cached_collection
+
+    def reload(self):
+        self._cached_collection = None
+
+
 class ESPMeta(type):
 
     def __new__(cls, name, bases, dct):
-        dct['class_name'] = name.lower()
+        dct['resource_name'] = pluralize(titlecase_to_underscore(name))
         return super(ESPMeta, cls).__new__(cls, name, bases, dct)
 
 
 class ESPResource(six.with_metaclass(ESPMeta, object)):
 
     def __init__(self, data):
-        if data['type'] != self.plural_name:
+        if data['type'] != self.resource_name:
             raise ObjectMismatchError('{} cannot store data for {}'.format(
-                self.plural_name, data['type']))
+                self.resource_name, data['type']))
 
         self._attributes = {}
         self._attributes['type'] = data['type']
@@ -37,14 +75,15 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         for k, v in data['attributes'].items():
             self._attributes[k] = v
 
-        # relationships are methods and so we store the link to those resources
-        # in a property prefixed with an underscore.
         for k, v in data['relationships'].items():
-            self._attributes[k] = v
+            self._attributes[k] = CachedRelationship(k, v)
 
     def __getattr__(self, attr):
         if attr in self._attributes:
-            return self._attributes[attr]
+            val = self._attributes[attr]
+            if isinstance(val, CachedRelationship):
+                return val.fetch()
+            return val
         raise AttributeError(attr)
 
     def __setattr__(self, attr, value):
@@ -65,6 +104,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
     def _resource_collection_path(cls):
         return '{name}'.format(pluralize(cls.__name__))
 
+    @classmethod
     def find(cls, id=None):
         if not id:
             return cls._all()
@@ -73,7 +113,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
     @classmethod
     def _get(cls, id):
         endpoint = make_endpoint(cls._resource_path(id))
-        response = cls.requester(endpoint, 'get')
+        response = cls._make_request(endpoint, GET_REQUEST)
         if response.status_code == 200:
             data = response.json()
             return data['data']
@@ -82,18 +122,16 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
     @classmethod
     def _all(cls):
         endpoint = make_endpoint(cls._resource_collection_path())
-        response = cls.requester(endpoint, 'get')
+        response = cls._make_request(endpoint, GET_REQUEST)
         if response.status_code == 200:
             data = response.json()
             for record in data['data']:
                 yield cls(record)
         yield
 
-    def _relationship_endpoint(self, rel_name):
-        if not hasattr(self, rel_name):
-            raise RelationshipDoesNotExist
-        rel = getattr(self, rel_name)
-        return rel['links']['related']
+    @classmethod
+    def create(**kwargs):
+        pass
 
     def to_json(self):
         """
