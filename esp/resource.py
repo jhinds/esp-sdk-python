@@ -77,18 +77,23 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
         for k, v in data['relationships'].items():
             self._attributes[k] = CachedRelationship(singularize(k), v)
+        self.init_complete = True
 
     def __getattr__(self, attr):
-        if attr in self._attributes:
-            val = self._attributes[attr]
-            if isinstance(val, CachedRelationship):
-                return val.fetch()
-            return val
+        if '_attributes' in self.__dict__:
+            if attr in self._attributes:
+                val = self._attributes[attr]
+                if isinstance(val, CachedRelationship):
+                    return val.fetch()
+                return val
         raise AttributeError(attr)
 
     def __setattr__(self, attr, value):
-        if attr in self._attributes:
-            self._attributes[attr] = value
+        if 'init_complete' in self.__dict__:
+            if attr in self.__dict__ or getattr(self.__class__, attr, None):
+                object.__setattr__(self, attr, value)
+            else:
+                self._attributes[attr] = value
         else:
             object.__setattr__(self, attr, value)
 
