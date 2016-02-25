@@ -22,6 +22,8 @@ def underscore_to_titlecase(value):
 
 cap_re = re.compile(r'(.)([A-Z][a-z]+)')
 all_re = re.compile(r'([a-z0-9])([A-Z])')
+
+
 def titlecase_to_underscore(value):
     s1 = cap_re.sub(r'\1_\2', value)
     return all_re.sub(r'\1_\2', s1).lower()
