@@ -1,6 +1,9 @@
+import importlib
+
 from .sdk import requester, make_endpoint
 from .packages import six
 from .utilities import (pluralize,
+                        singularize,
                         titlecase_to_underscore,
                         underscore_to_titlecase)
 
@@ -23,9 +26,9 @@ class PaginatedCollection(object):
 
 
 def find_class(name):
-    import ipdb; ipdb.set_trace()
-    module = __import__('.{}'.format(name))
-    pass
+    package = '.'.join(__name__.split('.')[:-1])
+    module = importlib.import_module('.{}'.format(name), package=package)
+    return getattr(module, underscore_to_titlecase(name))
 
 
 class CachedRelationship(object):
@@ -37,17 +40,14 @@ class CachedRelationship(object):
 
     def fetch(self):
         if not self._cached_collection:
-            # detect class type
-            # call endpoint
-            # iterate over results
             response = requester(self.endpoint, GET_REQUEST)
             if response.status_code != 200:
                 response.raise_for_status()
             data = response.json()['data']
             # TODO(kt) detect pagination responses and create a paginated
             # collection
-            for resource in data:
-                pass
+            cls = find_class(self.name)
+            self._cached_collection = [cls(resource) for resource in data]
         return self._cached_collection
 
     def reload(self):
@@ -76,7 +76,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
             self._attributes[k] = v
 
         for k, v in data['relationships'].items():
-            self._attributes[k] = CachedRelationship(k, v)
+            self._attributes[k] = CachedRelationship(singularize(k), v)
 
     def __getattr__(self, attr):
         if attr in self._attributes:
@@ -102,7 +102,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
     @classmethod
     def _resource_collection_path(cls):
-        return '{name}'.format(pluralize(cls.__name__))
+        return '{name}'.format(name=pluralize(cls.__name__))
 
     @classmethod
     def find(cls, id=None):
