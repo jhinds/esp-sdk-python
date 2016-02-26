@@ -94,19 +94,22 @@ class CachedRelationship(object):
     def __init__(self, name, rel):
         self.res_class = find_class_for_resource(name)
         self.endpoint = rel['links']['related']
-        self._collection = None
+        self._value = None
 
     def fetch(self):
         """
-        Memoized function that stored raw results in self._collection
+        Memoized function that stored raw results in self._value
         """
-        if not self._collection:
+        if not self._value:
             response = requester(self.endpoint, GET_REQUEST)
             if response.status_code != 200:
                 response.raise_for_status()
             data = response.json()
-            self._collection = PaginatedCollection(self.res_class, data)
-        return self._collection
+            if isinstance(data['data'], list):
+                self._value = PaginatedCollection(self.res_class, data)
+            else:
+                self._value = self.res_class(data['data'])
+        return self._value
 
     def reload(self):
         self._cached_collection = None
