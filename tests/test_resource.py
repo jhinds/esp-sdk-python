@@ -12,7 +12,7 @@ class TestResource(unittest.TestCase):
             'id': '1',
             'type': 'reports',
             'attributes': {
-                'status': 'fake_status',
+                'status': 'completed',
                 'created_at': '2016-02-26T18:00:00.000Z',
                 'updated_at': '2016-02-26T18:03:48.000Z',
             },
@@ -84,10 +84,25 @@ class TestResource(unittest.TestCase):
         mock_response = mock.Mock()
         mock_response.json.return_value = json.loads(self.report_response)
         mock_get.return_value = mock_response
+
         report = esp.Report.find(id=1)
 
         self.assertIsInstance(report, esp.report.Report)
-        #import ipdb; ipdb.set_trace()
+        self.assertEqual(report.status, 'completed')
+        self.assertEqual(report.id, '1')
+
+    @mock.patch('esp.sdk.requests.get')
+    def test_relationships_are_cachedrelationships(self, mock_get):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = json.loads(self.report_response)
+        mock_get.return_value = mock_response
+
+        report = esp.Report.find(id=1)
+
+        self.assertIsInstance(report._attributes['alerts'], esp.resource.CachedRelationship)
+        self.assertIsInstance(report._attributes['organization'], esp.resource.CachedRelationship)
+        self.assertIsInstance(report._attributes['sub_organization'], esp.resource.CachedRelationship)
+        self.assertIsInstance(report._attributes['team'], esp.resource.CachedRelationship)
 
     @mock.patch('esp.sdk.requests.get')
     def test_can_fetch_a_collection(self, mock_get):
