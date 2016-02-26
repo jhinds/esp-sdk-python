@@ -42,7 +42,8 @@ class PaginatedCollection(object):
         return iter(self.elements)
 
     def _parse_links(self, links):
-        self._current = links['self']
+        if 'self' in links:
+            self._current = links['self']
         if 'first' in links:
             self._first = links['first']
         if 'last' in links:
