@@ -1,5 +1,5 @@
 from .resource import ESPResource
 
 
-class Region(ESPResource):
+class Metadata(ESPResource):
     pass
