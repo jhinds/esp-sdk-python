@@ -25,12 +25,7 @@ class PageError(Exception):
     pass
 
 
-class IterCollection(type):
-    def __iter__(cls):
-        return iter(cls.elements)
-
-
-class PaginatedCollection(six.with_metaclass(IterCollection, object)):
+class PaginatedCollection(object):
 
     def __init__(self, resource_class, data):
         self.klass = resource_class
@@ -42,6 +37,9 @@ class PaginatedCollection(six.with_metaclass(IterCollection, object)):
         self._last = None
         if 'links' in data:
             self._parse_links(data['links'])
+
+    def __iter__(self):
+        return iter(self.elements)
 
     def _parse_links(self, links):
         self._current = links['self']
