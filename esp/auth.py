@@ -72,14 +72,17 @@ class ESPAuth(AuthBase):
         base64 string of the digest
         """
         url = urlparse(r.url)
+        uri = url.path
+        if url.query != '':
+            uri += '?{}'.format(url.query)
         canonical = '{content_type},{md5},{uri},{date}'.format(
             content_type=CONTENT_TYPE,
             md5=self.body_md5(r.body),
-            uri=url.path,
+            uri=uri,
             date=self.date)
         digest = hmac.new(self.secret_access_key.encode('utf-8'),
-                     canonical.encode('utf-8'),
-                     digestmod=hashlib.sha1).digest()
+                          canonical.encode('utf-8'),
+                          digestmod=hashlib.sha1).digest()
         return 'APIAuth {access_key}:{signature}'.format(
             access_key=self.access_key_id,
             signature=base64.b64encode(digest).decode())

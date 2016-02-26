@@ -21,7 +21,16 @@ class RelationshipDoesNotExist(Exception):
     pass
 
 
-class PaginatedCollection(object):
+class PageError(Exception):
+    pass
+
+
+class IterCollection(type):
+    def __iter__(cls):
+        return iter(cls.elements)
+
+
+class PaginatedCollection(six.with_metaclass(IterCollection, object)):
 
     def __init__(self, resource_class, data):
         self.klass = resource_class
@@ -46,16 +55,24 @@ class PaginatedCollection(object):
             self._prev = links['prev']
 
     def next_page(self):
-        pass
+        if not self._next:
+            raise PageError('No next page')
+        return self.klass.find(endpoint=self._next)
 
     def prev_page(self):
-        pass
+        if not self._prev:
+            raise PageError('No previous page')
+        return self.klass.find(endpoint=self._prev)
 
     def first_page(self):
-        pass
+        if not self._first:
+            raise PageError('No first page')
+        return self.klass.find(endpoint=self._first)
 
     def last_page(self):
-        pass
+        if not self._last:
+            raise PageError('No last page')
+        return self.klass.find(endpoint=self._last)
 
 
 def find_class_for_resource(name):
@@ -152,14 +169,15 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         return '{name}'.format(name=pluralize(cls.__name__))
 
     @classmethod
-    def find(cls, id=None):
+    def find(cls, id=None, endpoint=None):
         if not id:
-            return cls._all()
-        return cls._get(id)
+            return cls._all(endpoint=endpoint)
+        return cls._get(id, endpoint=endpoint)
 
     @classmethod
-    def _get(cls, id):
-        endpoint = make_endpoint(cls._resource_path(id))
+    def _get(cls, id, endpoint=None):
+        if not endpoint:
+            endpoint = make_endpoint(cls._resource_path(id))
         response = cls._make_request(endpoint, GET_REQUEST)
         if response.status_code == 200:
             data = response.json()
@@ -167,8 +185,9 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         return None
 
     @classmethod
-    def _all(cls):
-        endpoint = make_endpoint(cls._resource_collection_path())
+    def _all(cls, endpoint=None):
+        if not endpoint:
+            endpoint = make_endpoint(cls._resource_collection_path())
         response = cls._make_request(endpoint, GET_REQUEST)
         if response.status_code == 200:
             data = response.json()
