@@ -2,14 +2,18 @@ import re
 
 
 def pluralize(name):
-    # getting the name like this will break down as soon as we add
+    # Getting the name like this will break down as soon as we add
     # resources that don't just append an s for pluralization. Fix when
     # that problem arises.
     return name.lower() + 's'
 
 
 def singularize(name):
-    return name[:-1]
+    # This is a total hack that will only work with ESP resources. Don't use
+    # this for anything else.
+    if name[-1:] == 's':
+        return name[:-1]
+    return name
 
 
 def underscore_to_titlecase(value):

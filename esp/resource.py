@@ -23,8 +23,39 @@ class RelationshipDoesNotExist(Exception):
 
 class PaginatedCollection(object):
 
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, resource_class, data):
+        self.klass = resource_class
+        self.elements = [resource_class(res) for res in data['data']]
+        self._first = None
+        self._current = None
+        self._next = None
+        self._prev = None
+        self._last = None
+        if 'links' in data:
+            self._parse_links(data['links'])
+
+    def _parse_links(self, links):
+        self._current = links['self']
+        if 'first' in links:
+            self._first = links['first']
+        if 'last' in links:
+            self._last = links['last']
+        if 'next' in links:
+            self._next = links['next']
+        if 'prev' in links:
+            self._prev = links['prev']
+
+    def next_page(self):
+        pass
+
+    def prev_page(self):
+        pass
+
+    def first_page(self):
+        pass
+
+    def last_page(self):
+        pass
 
 
 def find_class_for_resource(name):
@@ -45,24 +76,21 @@ class CachedRelationship(object):
     """
 
     def __init__(self, name, rel):
-        self.class_object = find_class_for_resource(name)
+        self.res_class = find_class_for_resource(name)
         self.endpoint = rel['links']['related']
-        self._cached_collection = None
+        self._collection = None
 
     def fetch(self):
         """
-        Memoized function that stored raw results in self._cached_collection
+        Memoized function that stored raw results in self._collection
         """
-        if not self._cached_collection:
+        if not self._collection:
             response = requester(self.endpoint, GET_REQUEST)
             if response.status_code != 200:
                 response.raise_for_status()
-            data = response.json()['data']
-            # TODO(kt) detect pagination responses and create a paginated
-            # collection
-            self._cached_collection = PaginatedCollection(
-                self.class_object, data)
-        return self._cached_collection
+            data = response.json()
+            self._collection = PaginatedCollection(self.res_class, data)
+        return self._collection
 
     def reload(self):
         self._cached_collection = None
@@ -144,9 +172,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         response = cls._make_request(endpoint, GET_REQUEST)
         if response.status_code == 200:
             data = response.json()
-            for record in data['data']:
-                yield cls(record)
-        yield
+            return PaginatedCollection(cls, data)
 
     @classmethod
     def create(**kwargs):
