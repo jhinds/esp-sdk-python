@@ -7,14 +7,14 @@ packages = [
     'esp.packages.requests'
 ]
 
-#with open('README.rst', 'r', 'utf-8') as f:
-    #readme = f.read()
+with open('./README.rst', 'r', 'utf-8') as f:
+    readme = f.read()
 
 setup(
     name='esp',
     version='0.1.0',
     description='Evident Security Platform (ESP) SDK for Python',
-    #long_description=readme,
+    long_description=readme,
     author='Kyle Terry',
     author_email='kyle@evident.io',
     packages=packages,
@@ -24,7 +24,6 @@ setup(
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',

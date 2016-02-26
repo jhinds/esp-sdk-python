@@ -181,19 +181,16 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         if not endpoint:
             endpoint = make_endpoint(cls._resource_path(id))
         response = cls._make_request(endpoint, GET_REQUEST)
-        if response.status_code == 200:
-            data = response.json()
-            return data['data']
-        return None
+        data = response.json()
+        return cls(data['data'])
 
     @classmethod
     def _all(cls, endpoint=None):
         if not endpoint:
             endpoint = make_endpoint(cls._resource_collection_path())
         response = cls._make_request(endpoint, GET_REQUEST)
-        if response.status_code == 200:
-            data = response.json()
-            return PaginatedCollection(cls, data)
+        data = response.json()
+        return PaginatedCollection(cls, data)
 
     @classmethod
     def create(**kwargs):
