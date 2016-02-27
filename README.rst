@@ -10,7 +10,7 @@ This is still being built and subject to changes.
 Installation
 ------------
 
-.. code-block:: bash
+.. code-block:: sh
     pip install esp
 
 Configuration
