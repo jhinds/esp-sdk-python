@@ -112,4 +112,4 @@ class TestResource(unittest.TestCase):
         reports = esp.Report.find()
 
         self.assertIsInstance(reports, esp.resource.PaginatedCollection)
-        self.assertEqual(len(reports.elements), 2)
+        self.assertEqual(len(reports), 2)

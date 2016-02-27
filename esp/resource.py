@@ -41,6 +41,12 @@ class PaginatedCollection(object):
     def __iter__(self):
         return iter(self.elements)
 
+    def __len__(self):
+        return len(self.elements)
+
+    def __getitem__(self, idx):
+        return self.elements[idx]
+
     def _parse_links(self, links):
         if 'self' in links:
             self._current = links['self']
