@@ -131,7 +131,8 @@ class CachedRelationship(object):
 class ESPMeta(type):
 
     def __new__(cls, name, bases, dct):
-        dct['resource_name'] = pluralize(titlecase_to_underscore(name))
+        dct['plural_name'] = pluralize(titlecase_to_underscore(name))
+        dct['singular_name'] = singularize(titlecase_to_underscore(name))
         return super(ESPMeta, cls).__new__(cls, name, bases, dct)
 
 
@@ -143,9 +144,9 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         if errors:
             self.errors = errors
         elif data:
-            if data['type'] != self.resource_name:
+            if data['type'] != self.plural_name:
                 raise ObjectMismatchError('{} cannot store data for {}'.format(
-                    self.resource_name, data['type']))
+                    self.plural_name, data['type']))
 
             # type and id are python keywords, so we have to append _ to them
             # to avoid collisions
@@ -186,11 +187,11 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
     @classmethod
     def _resource_path(cls, id):
-        return '{name}/{id}'.format(name=pluralize(cls.__name__), id=id)
+        return '{name}/{id}'.format(name=cls.plural_name, id=id)
 
     @classmethod
     def _resource_collection_path(cls):
-        return '{name}'.format(name=pluralize(cls.__name__))
+        return '{name}'.format(name=cls.plural_name)
 
     @classmethod
     def find(cls, id=None, endpoint=None):
@@ -218,7 +219,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
     def create(cls, **kwargs):
         endpoint = make_endpoint(cls._resource_collection_path())
         payload = {
-            'type': pluralize(cls.__name__),
+            'type': cls.plural_name,
             'attributes': kwargs
         }
 

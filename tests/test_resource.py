@@ -162,8 +162,25 @@ class TestResource(TestBase):
 
         self.assertIsInstance(report, esp.report.Report)
         self.assertEqual(report.status, 'queued')
-        payload = json.dumps({'data': {'type': 'reports', 'attributes': {'team_id': 4}}})
+        payload = json.dumps({'data': {'type':
+                                       'reports',
+                                       'attributes': {'team_id': 4}}})
         self.assertEqual(mock_post.call_args[0],
                          ('http://localhost:3000/api/v2/reports',))
         self.assertEqual(mock_post.call_args[1]['data'],
                          payload)
+
+    def test_resources_have_singular_and_plural_names(self):
+        # just testing a few of these.
+        self.assertEqual(esp.Report.singular_name, 'report')
+        self.assertEqual(esp.Report.plural_name, 'reports')
+        self.assertEqual(esp.ExternalAccount.singular_name, 'external_account')
+        self.assertEqual(esp.ExternalAccount.plural_name, 'external_accounts')
+
+    def test_resource_path(self):
+        self.assertEqual(esp.Report._resource_path(1), 'reports/1')
+        self.assertEqual(esp.ExternalAccount._resource_path(1), 'external_accounts/1')
+
+    def test_resource_collection_path(self):
+        self.assertEqual(esp.Report._resource_collection_path(), 'reports')
+        self.assertEqual(esp.ExternalAccount._resource_collection_path(), 'external_accounts')
