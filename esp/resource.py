@@ -255,7 +255,16 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
                                       PATCH_REQUEST,
                                       data=self.to_json())
         data = response.json()
-        cls = find_class_for_resource(self.__class__.__name__)
+        cls = find_class_for_resource(self.singular_name)
         if response.status_code == 422:
             return cls(errors=data['errors'])
         return cls(data['data'])
+
+    def destroy(self):
+        endpoint = make_endpoint(self._resource_path(self.id_))
+        response = self._make_request(endpoint,
+                                      DELETE_REQUEST)
+        if response.status_code == 422:
+            data = response.json()
+            cls = find_class_for_resource(self.singular_name)
+            return cls(errors=data['errors'])
