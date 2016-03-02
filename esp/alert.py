@@ -2,4 +2,13 @@ from .resource import ESPResource
 
 
 class Alert(ESPResource):
-    pass
+
+    @classmethod
+    def create(cls):
+        raise NotImplementedError('Alert does not implement a create method')
+
+    def save(self):
+        raise NotImplementedError('Report does not implement a save method')
+
+    def destroy(self):
+        raise NotImplementedError('Report does not implement a destroy method')
