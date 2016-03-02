@@ -1,4 +1,5 @@
 import importlib
+import json
 
 from .sdk import requester, make_endpoint
 from .packages import six
@@ -8,6 +9,7 @@ from .utilities import (pluralize,
                         underscore_to_titlecase)
 
 GET_REQUEST = 'get'
+PATCH_REQUEST = 'patch'
 POST_REQUEST = 'post'
 PUT_REQUEST = 'put'
 DELETE_REQUEST = 'delete'
@@ -22,6 +24,10 @@ class RelationshipDoesNotExist(Exception):
 
 
 class PageError(Exception):
+    pass
+
+
+class DataMissingError(Exception):
     pass
 
 
@@ -87,6 +93,7 @@ def find_class_for_resource(name):
     :param name: name of the resource in singular form (e.g report, alert)
     :type name: string
     """
+    name = name.lower()  # always make sure it's lowercase
     package = '.'.join(__name__.split('.')[:-1])
     module = importlib.import_module('.{}'.format(name), package=package)
     return getattr(module, underscore_to_titlecase(name))
@@ -130,20 +137,29 @@ class ESPMeta(type):
 
 class ESPResource(six.with_metaclass(ESPMeta, object)):
 
-    def __init__(self, data):
-        if data['type'] != self.resource_name:
-            raise ObjectMismatchError('{} cannot store data for {}'.format(
-                self.resource_name, data['type']))
+    def __init__(self, data=None, errors=None):
+        self.errors = None
+        self._attributes = None
+        if errors:
+            self.errors = errors
+        elif data:
+            if data['type'] != self.resource_name:
+                raise ObjectMismatchError('{} cannot store data for {}'.format(
+                    self.resource_name, data['type']))
 
-        self._attributes = {}
-        self._attributes['type'] = data['type']
-        self._attributes['id'] = data['id']
+            # type and id are python keywords, so we have to append _ to them
+            # to avoid collisions
+            self.id_ = data['id']
+            self.type_ = data['type']
+            self._attributes = {}
 
-        for k, v in data['attributes'].items():
-            self._attributes[k] = v
+            for k, v in data['attributes'].items():
+                self._attributes[k] = v
 
-        for k, v in data['relationships'].items():
-            self._attributes[k] = CachedRelationship(singularize(k), v)
+            for k, v in data['relationships'].items():
+                self._attributes[k] = CachedRelationship(singularize(k), v)
+        else:
+            raise DataMissingError('Resource instances require `data` or `errors` to init')
         self.init_complete = True
 
     def __getattr__(self, attr):
@@ -165,8 +181,8 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
             object.__setattr__(self, attr, value)
 
     @classmethod
-    def _make_request(cls, endpoint, request_type):
-        return requester(endpoint, request_type)
+    def _make_request(cls, endpoint, request_type, data=None):
+        return requester(endpoint, request_type, data=data)
 
     @classmethod
     def _resource_path(cls, id):
@@ -199,13 +215,46 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         return PaginatedCollection(cls, data)
 
     @classmethod
-    def create(**kwargs):
-        pass
+    def create(cls, **kwargs):
+        endpoint = make_endpoint(cls._resource_collection_path())
+        payload = {
+            'type': pluralize(cls.__name__),
+            'attributes': kwargs
+        }
+
+        serialized = json.dumps({'data': payload})
+
+        response = cls._make_request(endpoint, POST_REQUEST, data=serialized)
+        data = response.json()
+        if response.status_code == 422:
+            return cls(errors=data['errors'])
+        return cls(data['data'])
 
     def to_json(self):
         """
         This is the method that will convert class data to a json string
         """
+        return json.dumps({'data': self.to_dict()})
+
+    def to_dict(self):
+        """
+        This is the method that will convert class data to a dict
+        """
+        attrs = {k: v for k, v in self._attributes.items()
+                 if not isinstance(v, CachedRelationship)}
+        return {
+            'id': self.id_,
+            'type': self.type_,
+            'attributes': attrs
+        }
 
     def save(self):
-        raise NotImplementedError
+        endpoint = make_endpoint(self._resource_path(self.id_))
+        response = self._make_request(endpoint,
+                                      PATCH_REQUEST,
+                                      data=self.to_json())
+        data = response.json()
+        cls = find_class_for_resource(self.__class__.__name__)
+        if response.status_code == 422:
+            return cls(errors=data['errors'])
+        return cls(data['data'])

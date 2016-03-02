@@ -2,4 +2,6 @@ from .resource import ESPResource
 
 
 class Report(ESPResource):
-    pass
+
+    def save(self):
+        raise NotImplementedError('Report does not implement a save function')
