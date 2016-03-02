@@ -1,11 +1,11 @@
 import json
 import mock
-import unittest
 
 import esp
+from .base import TestBase
 
 
-class TestResource(unittest.TestCase):
+class TestResource(TestBase):
 
     def setUp(self):
         self.report1 = {
