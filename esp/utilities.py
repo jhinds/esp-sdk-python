@@ -17,11 +17,7 @@ def singularize(name):
 
 
 def underscore_to_titlecase(value):
-    def titlecase():
-        while True:
-            yield str.capitalize
-    c = titlecase()
-    return "".join(next(c)(x) if x else '_' for x in value.split("_"))
+    return ''.join(x.capitalize() for x in value.split("_"))
 
 
 cap_re = re.compile(r'(.)([A-Z][a-z]+)')

@@ -1,11 +1,14 @@
+from __future__ import unicode_literals
+
 import base64
 from datetime import datetime
 import hashlib
 import hmac
 from time import mktime
-from urllib.parse import urlparse
 from wsgiref.handlers import format_date_time
+
 from .packages.requests.auth import AuthBase
+from .packages.six.moves.urllib.parse import urlparse
 
 CONTENT_TYPE = 'application/vnd.api+json'
 
