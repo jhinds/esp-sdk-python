@@ -157,8 +157,9 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
             for k, v in data['attributes'].items():
                 self._attributes[k] = v
 
-            for k, v in data['relationships'].items():
-                self._attributes[k] = CachedRelationship(singularize(k), v)
+            if 'relationships' in data:
+                for k, v in data['relationships'].items():
+                    self._attributes[k] = CachedRelationship(singularize(k), v)
         else:
             raise DataMissingError('Resource instances require `data` or `errors` to init')
         self.init_complete = True
