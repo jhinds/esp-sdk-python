@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 from setuptools import setup
+import sys
+if sys.version_info[0] == 2:
+    from io import open
 
 packages = [
     'esp',
