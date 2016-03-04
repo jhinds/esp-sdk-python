@@ -2,4 +2,7 @@ from .resource import ESPResource
 
 
 class ScanInterval(ESPResource):
-    pass
+
+    @classmethod
+    def find(cls, id):
+        return super(ESPResource, cls).find(id=id)
