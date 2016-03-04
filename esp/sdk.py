@@ -19,10 +19,16 @@ def requester(url, request_type, headers={}, data=None):
     logging.debug('Making request to {}'.format(url))
     headers['User-Agent'] = settings.user_agent
     method = getattr(requests, request_type)
-    response = method(url, data=data, headers=headers, auth=ESPAuth(
-        access_key_id=settings.access_key_id,
-        secret_access_key=settings.secret_access_key
-    ))
+    proxies = None
+    if settings.http_proxy:
+        proxies = [settings.http_proxy]
+    response = method(
+        url,
+        data=data,
+        headers=headers,
+        auth=ESPAuth(access_key_id=settings.access_key_id,
+                     secret_access_key=settings.secret_access_key),
+        proxies=proxies)
     if response.status_code == 401:
         raise UnauthorizedError
     return response
