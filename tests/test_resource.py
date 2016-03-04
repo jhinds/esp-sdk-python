@@ -184,3 +184,11 @@ class TestResource(TestBase):
     def test_resource_collection_path(self):
         self.assertEqual(esp.Report._resource_collection_path(), 'reports')
         self.assertEqual(esp.ExternalAccount._resource_collection_path(), 'external_accounts')
+
+    def test_resource_path_with_extra(self):
+        self.assertEqual(
+            esp.Report._resource_collection_path(extra=['foo', 'bar']),
+            'reports/foo/bar')
+        self.assertEqual(
+            esp.ExternalAccount._resource_collection_path(extra=['foo', 'bar']),
+            'external_accounts/foo/bar')

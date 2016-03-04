@@ -187,12 +187,20 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         return requester(endpoint, request_type, data=data)
 
     @classmethod
-    def _resource_path(cls, id):
-        return '{name}/{id}'.format(name=cls.plural_name, id=id)
+    def _resource_path(cls, id, extra=[]):
+        return cls._make_path([cls.plural_name, id], extra)
 
     @classmethod
-    def _resource_collection_path(cls):
-        return '{name}'.format(name=cls.plural_name)
+    def _resource_collection_path(cls, extra=[]):
+        return cls._make_path([cls.plural_name], extra)
+
+    @classmethod
+    def _make_path(cls, path, extra=[]):
+        if not isinstance(extra, list):
+            raise TypeError('extra needs to be a list')
+        path.extend(extra)
+        path = [str(item) for item in path]
+        return '/'.join(path)
 
     @classmethod
     def find(cls, id=None, endpoint=None):
