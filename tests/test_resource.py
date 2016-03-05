@@ -185,10 +185,38 @@ class TestResource(TestBase):
         self.assertEqual(esp.Report._resource_collection_path(), 'reports')
         self.assertEqual(esp.ExternalAccount._resource_collection_path(), 'external_accounts')
 
-    def test_resource_path_with_extra(self):
+    def test_resource_collection_path_with_extra(self):
         self.assertEqual(
             esp.Report._resource_collection_path(extra=['foo', 'bar']),
             'reports/foo/bar')
         self.assertEqual(
             esp.ExternalAccount._resource_collection_path(extra=['foo', 'bar']),
             'external_accounts/foo/bar')
+
+    def test_resource_path_with_extra(self):
+        self.assertEqual(
+            esp.Report._resource_path(1, extra=['foo', 'bar']),
+            'reports/1/foo/bar')
+        self.assertEqual(
+            esp.ExternalAccount._resource_path(1, extra=['foo', 'bar']),
+            'external_accounts/1/foo/bar')
+
+    def test_resource_collection_path_with_querystring(self):
+        self.assertEqual(
+            esp.Report._resource_collection_path(
+                querystring='testkey=testvalue&name=foo'),
+            'reports?testkey=testvalue&name=foo')
+        self.assertEqual(
+            esp.ExternalAccount._resource_collection_path(
+                querystring='testkey=testvalue&name=foo'),
+            'external_accounts?testkey=testvalue&name=foo')
+
+    def test_resource_path_with_querystring(self):
+        self.assertEqual(
+            esp.Report._resource_path(1,
+                querystring='testkey=testvalue&name=foo'),
+            'reports/1?testkey=testvalue&name=foo')
+        self.assertEqual(
+            esp.ExternalAccount._resource_path(1,
+                querystring='testkey=testvalue&name=foo'),
+            'external_accounts/1?testkey=testvalue&name=foo')
