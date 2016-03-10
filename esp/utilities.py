@@ -1,10 +1,18 @@
 import re
 
 
+plural_map = {
+    # singular: plural
+    'metadata': 'metadata',
+}
+
+
 def pluralize(name):
     # Getting the name like this will break down as soon as we add
     # resources that don't just append an s for pluralization. Fix when
     # that problem arises.
+    if name in plural_map:
+        return plural_map[name]
     return name.lower() + 's'
 
 

@@ -201,22 +201,14 @@ class TestResource(TestBase):
             esp.ExternalAccount._resource_path(1, extra=['foo', 'bar']),
             'external_accounts/1/foo/bar')
 
-    def test_resource_collection_path_with_querystring(self):
+    def test_make_path_path_with_querystring(self):
         self.assertEqual(
-            esp.Report._resource_collection_path(
-                querystring='testkey=testvalue&name=foo'),
+            esp.Report._make_path(['reports'],
+                query='testkey=testvalue&name=foo'),
             'reports?testkey=testvalue&name=foo')
-        self.assertEqual(
-            esp.ExternalAccount._resource_collection_path(
-                querystring='testkey=testvalue&name=foo'),
-            'external_accounts?testkey=testvalue&name=foo')
 
-    def test_resource_path_with_querystring(self):
+    def test_make_path_with_multiple_path_objects(self):
         self.assertEqual(
-            esp.Report._resource_path(1,
-                querystring='testkey=testvalue&name=foo'),
+            esp.Report._make_path(['reports', 1],
+                query='testkey=testvalue&name=foo'),
             'reports/1?testkey=testvalue&name=foo')
-        self.assertEqual(
-            esp.ExternalAccount._resource_path(1,
-                querystring='testkey=testvalue&name=foo'),
-            'external_accounts/1?testkey=testvalue&name=foo')

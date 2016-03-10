@@ -131,12 +131,12 @@ class CachedRelationship(object):
             response = requester(self.endpoint, GET_REQUEST)
             if response.status_code != 200:
                 response.raise_for_status()
-                data = response.json()
-                if isinstance(data['data'], list):
-                    self._value = PaginatedCollection(self.res_class, data)
-                else:
-                    self._value = self.res_class(data['data'])
-                    return self._value
+            data = response.json()
+            if isinstance(data['data'], list):
+                self._value = PaginatedCollection(self.res_class, data)
+            else:
+                self._value = self.res_class(data['data'])
+        return self._value
 
     def reload(self):
         self._cached_collection = None
@@ -174,9 +174,9 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
             if 'relationships' in data:
                 for k, v in data['relationships'].items():
                     self._attributes[k] = CachedRelationship(singularize(k), v)
-            else:
-                raise DataMissingError(
-                    'Resource instances require `data` or `errors` to init')
+        else:
+            raise DataMissingError(
+                'Resource instances require `data` or `errors` to init')
         self.init_complete = True
 
     def __getattr__(self, attr):
@@ -202,21 +202,21 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         return requester(endpoint, request_type, data=data)
 
     @classmethod
-    def _resource_path(cls, id, extra=[], querystring=None):
-        return cls._make_path([cls.plural_name, id], extra, querystring)
+    def _resource_path(cls, id, extra=[]):
+        return cls._make_path([cls.plural_name, id], extra)
 
     @classmethod
-    def _resource_collection_path(cls, extra=[], querystring=None):
-        return cls._make_path([cls.plural_name], extra, querystring)
+    def _resource_collection_path(cls, extra=[]):
+        return cls._make_path([cls.plural_name], extra)
 
     @classmethod
-    def _make_path(cls, path, extra=[], querystring=None):
+    def _make_path(cls, path, extra=[], query=None):
         if not isinstance(extra, list):
             raise TypeError('extra needs to be a list')
         path.extend(extra)
         path = '/'.join([str(item) for item in path])
-        if querystring:
-            path = path + '?' + querystring
+        if query:
+            path = path + '?' + query
         return path
 
     @classmethod
@@ -229,21 +229,30 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
     def _get(cls, id, endpoint=None):
         if not endpoint:
             endpoint = make_endpoint(cls._resource_path(id))
-            response = cls._make_request(endpoint, GET_REQUEST)
-            data = response.json()
-            return cls(data['data'])
+        response = cls._make_request(endpoint, GET_REQUEST)
+        data = response.json()
+        if response.status_code == 422:
+            return cls(errors=data['errors'])
+        return cls(data['data'])
 
     @classmethod
-    def _all(cls, endpoint=None, filter=None):
+    def _all(cls, endpoint=None):
         if not endpoint:
             endpoint = make_endpoint(
-                cls._resource_collection_path(querystring=filter))
-            response = cls._make_request(endpoint, GET_REQUEST)
-            data = response.json()
-            return PaginatedCollection(cls, data)
+                cls._resource_collection_path())
+        response = cls._make_request(endpoint, GET_REQUEST)
+        data = response.json()
+        if response.status_code == 422:
+            return cls(errors=data['errors'])
+        return PaginatedCollection(cls, data)
 
     @classmethod
     def where(cls, **clauses):
+        path = cls._resource_collection_path()
+        # from in clauses will override the above path
+        if 'from' in clauses:
+            path = clauses['from']
+            del clauses['from']
         filters = {}
         for k, v in six.iteritems(clauses):
             attr = k
@@ -255,8 +264,9 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
                 else:
                     attr = '{}_eq'.format(k)
             filters['filter[{}]'.format(attr)] = v
-        querystring = urlencode(filters)
-        return cls._all(filter=querystring)
+        query = urlencode(filters)
+        return cls._all(endpoint=make_endpoint(cls._make_path([path],
+                                                              query=query)))
 
     @classmethod
     def create(cls, **kwargs):
