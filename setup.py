@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
 import sys
+import re
 if sys.version_info[0] == 2:
     from io import open
 
@@ -13,9 +14,13 @@ packages = [
 with open('./README.rst', mode='r', encoding='utf-8') as f:
     readme = f.read()
 
+with open('esp/__init__.py', 'r') as fd:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        fd.read(), re.MULTILINE).group(1)
+
 setup(
     name='esp',
-    version='0.1.0',
+    version=version,
     description='Evident Security Platform (ESP) SDK for Python',
     long_description=readme,
     author='Kyle Terry',
