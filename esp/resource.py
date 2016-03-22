@@ -7,7 +7,7 @@ from .utilities import (pluralize,
                         singularize,
                         titlecase_to_underscore,
                         underscore_to_titlecase)
-from .packages.six.moves.urllib.parse import urlencode
+from .packages.six.moves.urllib.parse import urlencode, parse_qs, urlparse
 
 GET_REQUEST = 'get'
 PATCH_REQUEST = 'patch'
@@ -70,6 +70,8 @@ class PaginatedCollection(object):
     def _parse_links(self, links):
         if 'self' in links:
             self._current = links['self']
+            url = urlparse(self._current)
+            self.current_page_number = parse_qs(url.query)['page[number]'][0]
         if 'first' in links:
             self._first = links['first']
         if 'last' in links:
