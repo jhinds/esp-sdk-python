@@ -156,7 +156,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         self.errors = None
         self._attributes = None
         if errors:
-            self.errors = errors
+            self.errors = [e['title'] for e in errors]
         elif data:
             if data['type'] != self.plural_name:
                 raise ObjectMismatchError('{} cannot store data for {}'.format(

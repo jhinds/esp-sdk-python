@@ -80,4 +80,4 @@ class TestTeam(TestBase):
 
         self.assertTrue(mock_patch.called)
         self.assertTrue(updated_team.errors)
-        self.assertEquals(updated_team.errors[0]['title'], "Name can't be blank")
+        self.assertEquals(updated_team.errors[0], "Name can't be blank")
