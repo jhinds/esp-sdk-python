@@ -107,8 +107,8 @@ class PaginatedCollection(object):
     def page(self, page_num):
         query = {'page[number]': page_num}
         endpoint = '{}{}?{}'.format(settings.host,
-                                     self.collection_path,
-                                     urlencode(query))
+                                    self.collection_path,
+                                    urlencode(query))
         return self.klass.find(endpoint=endpoint)
 
 
