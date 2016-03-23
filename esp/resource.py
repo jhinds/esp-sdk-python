@@ -2,6 +2,7 @@ import importlib
 import json
 
 from .sdk import requester, make_endpoint
+from .settings import settings
 from .packages import six
 from .utilities import (pluralize,
                         singularize,
@@ -50,6 +51,7 @@ class PaginatedCollection(object):
     def __init__(self, resource_class, data):
         self.klass = resource_class
         self.elements = [resource_class(res) for res in data['data']]
+        self._collection_link = None
         self._first = None
         self._current = None
         self._next = None
@@ -71,6 +73,7 @@ class PaginatedCollection(object):
         if 'self' in links:
             self._current = links['self']
             url = urlparse(self._current)
+            self.collection_path = url.path
             self.current_page_number = parse_qs(url.query)['page[number]'][0]
         if 'first' in links:
             self._first = links['first']
@@ -100,6 +103,13 @@ class PaginatedCollection(object):
         if not self._last:
             raise PageError('No last page')
         return self.klass.find(endpoint=self._last)
+
+    def page(self, page_num):
+        query = {'page[number]': page_num}
+        endpoint = '{}{}?{}'.format(settings.host,
+                                     self.collection_path,
+                                     urlencode(query))
+        return self.klass.find(endpoint=endpoint)
 
 
 def find_class_for_resource(name):
