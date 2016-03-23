@@ -4,7 +4,7 @@ from . import __version__ as version
 
 DEFAULT_BASE_URL = 'https://esp.evident.io'
 DEFAULT_HTTP_PROXY = None
-DEFAULT_PER_PAGE = 10
+DEFAULT_PER_PAGE = 20
 # add version to the user agent
 DEFAULT_USER_AGENT = 'Python SDK {version}'.format(version=version)
 
