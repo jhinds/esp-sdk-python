@@ -140,6 +140,8 @@ class CachedRelationship(object):
         Memoized function that stored raw results in self._value
         """
         if not self._value:
+            if not self.endpoint:
+                return None
             response = requester(self.endpoint, GET_REQUEST)
             if response.status_code != 200:
                 response.raise_for_status()

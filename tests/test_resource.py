@@ -110,6 +110,63 @@ class TestResource(TestBase):
 
         self.queued_report_response = json.dumps({'data': self.queued_report})
 
+        self.alert = {
+            'id': '5',
+            'type': 'alerts',
+            'attributes': {
+                'created_at': '2015-12-08T22:21:47.837Z',
+                'status': 'fail',
+                'resource': 'resource-6',
+                'updated_at': '2015-12-08T22:21:47.844Z',
+                'started_at': '2015-12-08T22:20:47.833Z',
+                'ended_at': None
+            },
+            'relationships': {
+                'external_account': {
+                    'links': {
+                    'related': 'https://api.evident.io/api/v2/external_accounts/6.json'
+                    }
+                },
+                'region': {
+                    'links': {
+                    'related': 'https://api.evident.io/api/v2/regions/6.json'
+                    }
+                },
+                'signature': {
+                    'links': {
+                    'related': 'https://api.evident.io/api/v2/signatures/4.json'
+                    }
+                },
+                'custom_signature': {
+                    'links': {
+                    'related': None
+                    }
+                },
+                'suppression': {
+                    'links': {
+                    'related': None
+                    }
+                },
+                'metadata': {
+                    'links': {
+                    'related': 'https://api.evident.io/api/v2/alerts/5/metadata.json'
+                    }
+                },
+                'cloud_trail_events': {
+                    'links': {
+                    'related': 'https://api.evident.io/api/v2/alerts/5/cloud_trail_events.json'
+                    }
+                },
+                'tags': {
+                    'links': {
+                    'related': 'https://api.evident.io/api/v2/alerts/5/tags.json'
+                    }
+                }
+            }
+        }
+
+        self.alert_response = json.dumps({'data': self.alert})
+
         super(TestResource, self).setUp()
 
     @mock.patch('esp.sdk.requests.get')
@@ -140,6 +197,16 @@ class TestResource(TestBase):
                               esp.resource.CachedRelationship)
         self.assertIsInstance(report._attributes['team'],
                               esp.resource.CachedRelationship)
+
+    @mock.patch('esp.sdk.requests.get')
+    def test_relationships_return_none_when_links_do_not_exist(self, mock_get):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = json.loads(self.alert_response)
+        mock_get.return_value = mock_response
+
+        alert = esp.Alert.find(id=1)
+
+        self.assertIsNone(alert.suppression)
 
     @mock.patch('esp.sdk.requests.get')
     def test_can_fetch_a_collection(self, mock_get):
