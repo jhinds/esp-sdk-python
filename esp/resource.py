@@ -287,7 +287,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
                                                               query=query)))
 
     @classmethod
-    def create(cls, **kwargs):
+    def create(cls, with_path=None, **kwargs):
         """
         Create a new resource in ESP.
 
@@ -296,7 +296,10 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
         :returns: a new instance of the resource class
         """
-        endpoint = make_endpoint(cls._resource_collection_path())
+        if not with_path:
+            endpoint = make_endpoint(cls._resource_collection_path())
+        else:
+            endpoint = make_endpoint(with_path)
         payload = {
             'type': cls.plural_name,
             'attributes': kwargs
