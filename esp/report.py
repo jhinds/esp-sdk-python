@@ -1,4 +1,5 @@
 from .resource import ESPResource
+from .stat import Stat
 
 
 class Report(ESPResource):
@@ -8,3 +9,6 @@ class Report(ESPResource):
 
     def destroy(self):
         raise NotImplementedError('Report does not implement a destroy method')
+
+    def stat(self):
+        return Stat.for_report(self.id_)
