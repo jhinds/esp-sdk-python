@@ -1,9 +1,9 @@
 from .alert import Alert
 from .resource import (ESPResource,
                        POST_REQUEST,
-                       PaginatedCollection,
                        find_class_for_resource)
 from .sdk import make_endpoint
+from .suppression import SuppressionSignature
 
 
 class Signature(ESPResource):
@@ -29,4 +29,10 @@ class Signature(ESPResource):
         if response.status_code == 422:
             cls = find_class_for_resource(self.singular_name)
             return cls(errors=data)
-        return PaginatedCollection(Alert, data)
+        return Alert(data)
+
+    def suppress(self, **kwargs):
+        return SuppressionSignature.create(signature_ids=[self.id_],
+                                           regions=kwargs['regions'],
+                                           external_account_ids=kwargs['external_account_ids'],
+                                           reason=kwargs['reason'])
