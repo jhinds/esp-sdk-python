@@ -17,7 +17,7 @@ class Metadata(ESPResource):
         :type id: int
         :returns: Metadata instance
         """
-        return super(ESPResource, cls).find(id=id)
+        return super(Metadata, cls).find(id=id)
 
     @classmethod
     def create(cls):
