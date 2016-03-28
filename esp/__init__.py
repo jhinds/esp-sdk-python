@@ -20,6 +20,7 @@ from .stat_region import StatRegion
 from .stat_service import StatService
 from .stat_signature import StatSignature
 from .sub_organization import SubOrganization
+from .suppression import Suppression
 from .tag import Tag
 from .team import Team
 from .user import User
