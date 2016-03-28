@@ -271,17 +271,22 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         if 'from' in clauses:
             path = clauses['from']
             del clauses['from']
-        filters = {}
-        for k, v in six.iteritems(clauses):
-            attr = k
-            if any(i in k for i in PREDICATES):
-                attr = k
+        filters = []
+        for key, val in six.iteritems(clauses):
+            attr = key
+            if any(i in key for i in PREDICATES):
+                attr = key
             else:
-                if isinstance(v, list):
-                    attr = '{}_in'.format(k)
-                else:
-                    attr = '{}_eq'.format(k)
-            filters['filter[{}]'.format(attr)] = v
+                if key != 'sorts':
+                    if isinstance(val, list):
+                        attr = '{}_in'.format(key)
+                    else:
+                        attr = '{}_eq'.format(key)
+            if isinstance(val, list):
+                for fv in val:
+                    filters.append(('filter[{}][]'.format(attr), fv))
+            else:
+                filters.append(('filter[{}]'.format(attr), val))
         query = urlencode(filters)
         return cls._all(endpoint=make_endpoint(cls._make_path([path],
                                                               query=query)))

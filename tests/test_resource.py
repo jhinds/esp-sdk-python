@@ -237,6 +237,54 @@ class TestResource(TestBase):
         self.assertEqual(mock_post.call_args[1]['data'],
                          payload)
 
+    @mock.patch('esp.sdk.requests.get')
+    def test_searching(self, mock_get):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = json.loads(
+            self.reports_response)
+        mock_get.return_value = mock_response
+
+        reports = esp.Report.where(organization_id=1)
+
+        self.assertEqual(mock_get.call_args[0],
+                         ('http://localhost:3000/api/v2/reports?filter%5Borganization_id_eq%5D=1',))
+
+    @mock.patch('esp.sdk.requests.get')
+    def test_sorting_single(self, mock_get):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = json.loads(
+            self.reports_response)
+        mock_get.return_value = mock_response
+
+        reports = esp.Report.where(sorts='status')
+
+        self.assertEqual(mock_get.call_args[0],
+                         ('http://localhost:3000/api/v2/reports?filter%5Bsorts%5D=status',))
+
+    @mock.patch('esp.sdk.requests.get')
+    def test_sorting_multiple(self, mock_get):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = json.loads(
+            self.reports_response)
+        mock_get.return_value = mock_response
+
+        reports = esp.Report.where(sorts=['id desc', 'status'])
+
+        self.assertEqual(mock_get.call_args[0],
+                         ('http://localhost:3000/api/v2/reports?filter%5Bsorts%5D%5B%5D=id+desc&filter%5Bsorts%5D%5B%5D=status',))
+
+    @mock.patch('esp.sdk.requests.get')
+    def test_searching_and_sorting(self, mock_get):
+        mock_response = mock.Mock()
+        mock_response.json.return_value = json.loads(
+            self.reports_response)
+        mock_get.return_value = mock_response
+
+        reports = esp.Report.where(organization_id=1, sorts=['id desc', 'status'])
+
+        self.assertEqual(mock_get.call_args[0],
+                         ('http://localhost:3000/api/v2/reports?filter%5Borganization_id_eq%5D=1&filter%5Bsorts%5D%5B%5D=id+desc&filter%5Bsorts%5D%5B%5D=status',))
+
     def test_resources_have_singular_and_plural_names(self):
         # just testing a few of these.
         self.assertEqual(esp.Report.singular_name, 'report')
