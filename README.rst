@@ -108,3 +108,50 @@ returns a PaginatedCollection of Alert objects, lets look at one::
 
     In [19]: alert.signature.name
     Out[19]: 'VPC ELB Security Groups'
+
+In that last line we accessed the signature object by calling .signature, then
+called .name on that object to get the name of the signature. Method chaining like
+this makes using the ESP API data very useful and simple.
+
+Okay, so we know a report ID we want to look up, lets try that::
+
+    In [20]: report = esp.Report.find(1)
+
+    In [21]: report
+    Out[21]: <esp.report.Report at 0x10b2e2978>
+
+Here we used find() again, but we passed in an ID as a argument. This did not
+return a paginated collection, but instead returned an instance of the report by
+itself.
+
+So maybe we want to get a collection of signatures who check for DNS related stuff,
+we can do that::
+
+    In [22]: signatures = esp.Signature.where(name_cont='dns')
+
+    In [23]: len(signatures)
+    Out[23]: 3
+
+    In [24]: signatures[0].name
+    Out[24]: 'Global DNS TCP'
+
+    In [25]: signatures[1].name
+    Out[25]: 'Global DNS UDP'
+
+    In [26]: signatures[2].name
+    Out[26]: 'Route53 DNS'
+
+Looks like the API gaves us 3 and all of them have DNS in the name. Good job!
+where() takes parameters and converts them into search filters for ESP. There
+is a list of predicates available can be found here http://api-docs.evident.io/?json#available-predicates
+
+Predicates are used within Evident.io API search queries to determine what information to match. For instance, the cont predicate, when added to the name attribute, will check to see if name` contains a value using a wildcard query.
+
+You can add more to where() to form complex queries::
+
+    In [2]: esp.Suppression.where(regions_code_start='us', resource_not_null='1')
+    Out[2]: <esp.resource.PaginatedCollection at 0x104a18dd8>
+
+You can also change the combinator for complex queries from the default AND to OR by adding the m='or' parameter::
+
+    In [5]: esp.Suppression.where(regions_code_start='us', resource_not_null='1', m='or')
