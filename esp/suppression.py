@@ -27,6 +27,8 @@ class Suppression(ESPResource):
 
 class SuppressionRegion(ESPResource):
 
+    resource_type = 'suppressions'
+
     @classmethod
     def find(cls, *args, **kwargs):
         raise NotImplementedError('Suppressions do not support find()')
@@ -47,6 +49,8 @@ class SuppressionRegion(ESPResource):
 
 
 class SuppressionSignature(ESPResource):
+
+    resource_type = 'suppressions'
 
     @classmethod
     def find(cls, *args, **kwargs):
@@ -74,6 +78,8 @@ class SuppressionSignature(ESPResource):
 
 
 class SuppressionUniqueIdentifier(ESPResource):
+
+    resource_type = 'suppressions'
 
     @classmethod
     def find(cls, *args, **kwargs):

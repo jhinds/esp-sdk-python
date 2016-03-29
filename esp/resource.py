@@ -169,15 +169,21 @@ class ESPMeta(type):
 
 class ESPResource(six.with_metaclass(ESPMeta, object)):
 
+    resource_type = None
+
     def __init__(self, data=None, errors=None):
         self.errors = None
         self._attributes = None
         if errors:
             self.errors = [e['title'] for e in errors]
         elif data:
-            if data['type'] != self.plural_name:
+            # allows us to override the resource type in things like
+            # suppressions.
+            if not self.resource_type:
+                self.resource_type = self.plural_name
+            if data['type'] != self.resource_type:
                 raise ObjectMismatchError('{} cannot store data for {}'.format(
-                    self.plural_name, data['type']))
+                    self.resource_name, data['type']))
 
             # type and id are python keywords, so we have to append _ to them
             # to avoid collisions
@@ -266,6 +272,14 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
     @classmethod
     def where(cls, **clauses):
+        """
+        Create a new resource in ESP.
+
+        :param clauses: arbitrary search attributes relating to this resource.
+        See API docs for more information about what is required.
+
+        :returns: a new PaginatedCollection of the resources
+        """
         path = cls._resource_collection_path()
         # from in clauses will override the above path
         if 'from' in clauses:

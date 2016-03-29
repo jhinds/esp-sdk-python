@@ -1,5 +1,8 @@
 from .resource import ESPResource, make_endpoint
 from .report import Report
+from .suppression import (SuppressionRegion,
+                          SuppressionSignature,
+                          SuppressionUniqueIdentifier)
 
 
 class Alert(ESPResource):
@@ -23,3 +26,15 @@ class Alert(ESPResource):
         del clauses['report_id']
         clauses['from'] = from_
         return super(Alert, cls).where(**clauses)
+
+    def suppress_region(self, reason):
+        return self.suppress(SuppressionRegion, reason)
+
+    def suppress_signature(self, reason):
+        return self.suppress(SuppressionSignature, reason)
+
+    def suppress_unique_identifier(self, reason):
+        return self.suppress(SuppressionUniqueIdentifier, reason)
+
+    def suppress(self, klass, reason):
+        return klass.create(alert_id=self.id_, reason=reason)

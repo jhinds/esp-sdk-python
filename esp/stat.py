@@ -5,8 +5,8 @@ from .sdk import make_endpoint
 class Stat(ESPResource):
 
     @classmethod
-    def list(cls):
-        raise NotImplementedError('Stat does not implement a list method')
+    def find(cls):
+        raise NotImplementedError('Stat does not implement a find method')
 
     @classmethod
     def create(cls, **kwargs):
@@ -24,7 +24,7 @@ class Stat(ESPResource):
 
     @classmethod
     def for_report(cls, report_id):
-        path = '/'.join(['reports', report_id, 'stats'])
+        path = '/'.join(['reports', str(report_id), 'stats'])
         endpoint = make_endpoint(path)
         return cls._get(endpoint=endpoint)
 
