@@ -1,15 +1,9 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 import re
 if sys.version_info[0] == 2:
     from io import open
-
-packages = [
-    'esp',
-    'esp.packages',
-    'esp.packages.requests'
-]
 
 with open('./README.rst', mode='r', encoding='utf-8') as f:
     readme = f.read()
@@ -25,7 +19,7 @@ setup(
     long_description=readme,
     author='Kyle Terry',
     author_email='kyle@evident.io',
-    packages=packages,
+    packages=find_packages(),
     py_modules=['esp'],
     classifiers=(
         'Development Status :: 5 - Production/Stable',
