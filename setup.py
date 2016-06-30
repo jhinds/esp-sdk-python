@@ -20,6 +20,7 @@ setup(
     author='Kyle Terry',
     author_email='kyle@evident.io',
     packages=find_packages(),
+    package_data={'esp': ['packages/requests/*.pem']},
     py_modules=['esp'],
     classifiers=(
         'Development Status :: 5 - Production/Stable',
