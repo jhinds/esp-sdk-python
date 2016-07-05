@@ -32,7 +32,7 @@ class ESPAuth(AuthBase):
         """
         self.access_key_id = access_key_id
         self.secret_access_key = secret_access_key
-        self.date = None # set at the time of __call__ in case of reuse
+        self.date = None  # set at the time of __call__ in case of reuse
 
     def __call__(self, r):
         """
@@ -59,7 +59,7 @@ class ESPAuth(AuthBase):
         Returns a base64 string of the content body passed in.
         """
         if not body:
-           body = ''
+            body = ''
         body_bytes = body.encode('utf-8')
         b64 = base64.b64encode(hashlib.md5(body_bytes).digest())
         return b64.decode()
@@ -78,7 +78,8 @@ class ESPAuth(AuthBase):
         uri = url.path
         if url.query != '':
             uri += '?{}'.format(url.query)
-        canonical = '{content_type},{md5},{uri},{date}'.format(
+        canonical = '{method},{content_type},{md5},{uri},{date}'.format(
+            method=r.method.upper(),
             content_type=CONTENT_TYPE,
             md5=self.body_md5(r.body),
             uri=uri,
