@@ -16,10 +16,11 @@ class TestAuth(unittest.TestCase):
     def test_apiauth_can_sign_request(self):
         request = MockRequest('http://example.com/api/v2/external_accounts',
                               '{"data":{"attributes":{"name":"Testing"}}}')
+        request.method = 'PATCH'
         ESPAuth._request_date = mock.MagicMock(
             return_value='Mon, 21 October 2015 04:20:01 GMT')
         auth = ESPAuth('abc', 'abc123')
         request = auth(request)
 
         self.assertEqual(request.headers['Authorization'],
-                         'APIAuth abc:hdhT6Ufm5jACjdsoJhdaO7JnEmQ=')
+                         'APIAuth abc:rJKRqR9sESjbIJgaYSQ23TPtlgA=')
