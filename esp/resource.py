@@ -231,7 +231,10 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
     @classmethod
     def _resource_collection_path(cls, extra=[]):
-        return cls._make_path([cls.plural_name], extra)
+        query = {
+            'page[size]': settings.per_page
+        }
+        return cls._make_path([cls.plural_name], extra, query=urlencode(query))
 
     @classmethod
     def _make_path(cls, path, extra=[], query=None):
@@ -301,6 +304,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
                     filters.append(('filter[{}][]'.format(attr), fv))
             else:
                 filters.append(('filter[{}]'.format(attr), val))
+        filters.append(('page[size]', settings.per_page))
         query = urlencode(filters)
         return cls._all(endpoint=make_endpoint(cls._make_path([path],
                                                               query=query)))
