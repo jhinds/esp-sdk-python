@@ -25,7 +25,7 @@ class TestExternalAccount(TestBase):
 
         ExternalAccount.create(name='test',
                                arn='test',
-                               sub_organization_id=1,
+                               external_id='11111111-1111-1111-1111-1111111111111',
                                team_id=1)
 
         self.assertIn('external_id', mock_post.call_args[1]['data'])
