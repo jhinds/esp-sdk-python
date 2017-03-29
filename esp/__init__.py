@@ -3,9 +3,11 @@ __version__ = '0.1.4'
 
 from .alert import Alert
 from .cloud_trail_event import CloudTrailEvent
+from .compliance_control import ComplianceControl
 from .contact_request import ContactRequest
 from .custom_signature import CustomSignature
 from .dashboard import Dashboard
+from .disabled_signature import DisabledSignature
 from .external_account import ExternalAccount
 from .metadata import Metadata
 from .organization import Organization
