@@ -231,10 +231,7 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
 
     @classmethod
     def _resource_collection_path(cls, extra=[]):
-        query = {
-            'page[size]': settings.per_page
-        }
-        return cls._make_path([cls.plural_name], extra, query=urlencode(query))
+        return cls._make_path([cls.plural_name], extra)
 
     @classmethod
     def _make_path(cls, path, extra=[], query=None):
@@ -320,7 +317,10 @@ class ESPResource(six.with_metaclass(ESPMeta, object)):
         :returns: a new instance of the resource class
         """
         if not with_path:
-            endpoint = make_endpoint(cls._resource_collection_path())
+            path = cls._resource_collection_path()
+            query = urlencode({'page[size]': settings.per_page})
+            encoded_resource_collection_path = cls._make_path([path],query=query)
+            endpoint = make_endpoint(encoded_resource_collection_path)
         else:
             endpoint = make_endpoint(with_path)
         payload = {
