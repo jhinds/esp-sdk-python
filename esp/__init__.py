@@ -1,10 +1,11 @@
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 
 from .alert import Alert
 from .cloud_trail_event import CloudTrailEvent
 from .compliance_control import ComplianceControl
 from .contact_request import ContactRequest
+from .credential import Credential
 from .custom_signature import CustomSignature
 from .dashboard import Dashboard
 from .disabled_signature import DisabledSignature
