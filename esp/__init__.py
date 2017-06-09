@@ -1,6 +1,7 @@
 __version__ = '0.1.9'
 
 
+
 from .alert import Alert
 from .cloud_trail_event import CloudTrailEvent
 from .compliance_control import ComplianceControl
