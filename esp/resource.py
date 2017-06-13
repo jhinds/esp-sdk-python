@@ -123,14 +123,15 @@ def find_class_for_resource(name):
     :type name: string
     """
     name = name.lower()  # always make sure it's lowercase
+    name = underscore_to_titlecase(name)
+    name = str(name)
     try:
         package = '.'.join(__name__.split('.')[:-1])
         module = importlib.import_module('.{}'.format(name), package=package)
-        return getattr(module, underscore_to_titlecase(name))
+        return getattr(module, name)
     except ImportError:
-        dynamically_created_object = type(underscore_to_titlecase(name), (ESPResource,), {})
+        dynamically_created_object = type(name, (ESPResource,), {})
         return dynamically_created_object
-
 
 class CachedRelationship(object):
     """
