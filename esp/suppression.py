@@ -44,7 +44,7 @@ class SuppressionRegion(ESPResource):
             path_array.extend(['alert', kwargs['alert_id']])
         path_array.append('regions')
         path = '/'.join(path_array)
-        return super(SuppressionSignature, self).create(with_path=path,
+        return super(SuppressionRegion, self).create(with_path=path,
                                                         **kwargs)
 
 
@@ -96,5 +96,5 @@ class SuppressionUniqueIdentifier(ESPResource):
             path_array.extend(['alert', kwargs['alert_id']])
         path_array.append('unique_identifiers')
         path = '/'.join(path_array)
-        return super(SuppressionSignature, self).create(with_path=path,
+        return super(SuppressionUniqueIdentifier, self).create(with_path=path,
                                                         **kwargs)
